@@ -7,8 +7,6 @@ output: html_document
 knitr::opts_chunk$set(echo = TRUE)
 ```
 
-This assignment is due by 6 pm on the evening of the 3rd class. It should be submitted via Github.
-
 #### Exercises
 
 We'll be exploring [fuel economy data](https://www.fueleconomy.gov/feg/download.shtml) from 1984-2021. You can review a data dictionary for the dataset [here](https://www.fueleconomy.gov/feg/ws/index.shtml#vehicle).
