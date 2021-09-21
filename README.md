@@ -1,5 +1,7 @@
 # Week 3 - Introduction to the tidyverse
 
+## Description and Topics
+
 The tidyverse is an opinionated collection of R packages that share a similar design philosophy. These tools allow for complex data transformations that aid in the EDA process. Topics covered will include:
 
 -   Data transformation using the `dplyr` package
