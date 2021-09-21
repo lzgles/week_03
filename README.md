@@ -9,14 +9,14 @@ The tidyverse is an opinionated collection of R packages that share a similar de
 
 ## Assignment
 
-|                   |                                |
-|-------------------|--------------------------------|
-| Points:           | 5                              |
-| Display grade as: | Points                         |
-| Submission type:  | Via Github                     |
-| Due date:         | October 18, 2021, during class |
-| Available from:   | October 11, 12:00 am           |
-| Until:            |                                |
+|                   |                            |
+|-------------------|----------------------------|
+| Points:           | 5                          |
+| Display grade as: | Points                     |
+| Submission type:  | Via Github                 |
+| Due date:         | October 18, 2021, 5:59 pm  |
+| Available from:   | October 11, 2021, 12:00 am |
+| Until:            |                            |
 
 Complete all questions in the `Week_03_Assignment.Rmd` file.
 
