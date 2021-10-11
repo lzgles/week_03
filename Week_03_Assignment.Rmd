@@ -18,7 +18,7 @@ library(tidyverse)
 library(here)
 
 vehicles <- read_csv(here::here("Data", "vehicles.csv"),
-                     col_tyfpes = cols(.default = "c"))
+                     col_types = cols(.default = "c"))
 ```
 
 1. Create a reduced version of the dataset that includes the following fields:
@@ -51,7 +51,7 @@ Assign this to a new dataframe called `vehicles_sub`.
 
 Indicate anything interesting that you notice.
 
-Hint: When finding counts of fields, sometimes it is helpful to sort the field from highest to lowest values.
+*Hint: When finding counts of fields, sometimes it is helpful to sort the field from highest to lowest values.*
 
 ```{r}
 
@@ -92,3 +92,8 @@ Hint: When finding counts of fields, sometimes it is helpful to sort the field f
 -   Create a graph that assists in answering the question.
 -   Write a short interpretation of the graph in order to answer your question.
 
+7. Submit the following information about the project you would like to solve for your course project:
+
+*   The dataset(s) you will be utilizing to perform your analysis. This may be Slacked or emailed to me separately from this document. You may include a direct link to the dataset, a file, the API you intend to extract the data from, or the 
+*   The business question that you intend to answer through your analysis.
+*   A high level description of how you intend to answer the proposed business question.
