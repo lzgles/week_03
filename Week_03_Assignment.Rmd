@@ -9,7 +9,7 @@ knitr::opts_chunk$set(echo = TRUE)
 
 #### Exercises
 
-We'll be exploring [fuel economy data](https://www.fueleconomy.gov/feg/download.shtml) from 1984-2021. You can review a data dictionary for the dataset [here](https://www.fueleconomy.gov/feg/ws/index.shtml#vehicle).
+1. We'll be exploring [fuel economy data](https://www.fueleconomy.gov/feg/download.shtml) from 1984-2021. You can review a data dictionary for the dataset [here](https://www.fueleconomy.gov/feg/ws/index.shtml#vehicle).
 
 Utilize the following chunk to get started with your analysis.
 
@@ -21,7 +21,9 @@ vehicles <- read_csv(here::here("Data", "vehicles.csv"),
                      col_types = cols(.default = "c"))
 ```
 
-1. Create a reduced version of the dataset that includes the following fields:
+Describe what is happening in the `col_types` parameter. Why do you think this is necessary?
+
+2. Create a reduced version of the dataset that includes the following fields:
 
 -   `make`
 -   `model`
@@ -43,7 +45,7 @@ Assign this to a new dataframe called `vehicles_sub`.
 
 ```
 
-2. Conduct an exploratory analysis of each field in the dataset. This should include:
+3. Conduct an exploratory analysis of each field in the dataset. This should include:
 
 - Demonstrating the structure of the dataset
 - Counts of each character field (in addition to the `year` field)
@@ -66,7 +68,7 @@ Indicate anything interesting that you notice.
 
 ```
 
-3. Some of the fields need to be cleaned to ease analysis. 
+4. Some of the fields need to be cleaned to ease analysis. 
 
 - Create a new field in `vehicles_sub` called `evMotor_flag` that indicates whether or not the vehicle has an electric motor.
 
@@ -75,24 +77,25 @@ Indicate anything interesting that you notice.
 ```
 
 
-4. Create a graph that demonstrates how median city mileage has changed over time.
+5. Create a graph that demonstrates how median city mileage has changed over time.
 
 ```{r}
 
 ```
 
-5. Consider the top 5 car makes whose fuel economies have been evaluated most frequently. Create a graph that demonstrates how the city fuel mileage has changed over time for these makes.
+6. Consider the top 5 car makes whose fuel economies have been evaluated most frequently. Create a graph that demonstrates how the city fuel mileage has changed over time for these makes.
 
 ```{r}
 
 ```
-6. Create a question about the dataset that must be solved by using the `dplyr` verbs - `select`, `mutate`, `summarize`, `arrange`, etc.
+
+7. Create a question about the dataset that must be solved by using the `dplyr` verbs - `select`, `mutate`, `summarize`, `arrange`, etc.
 
 -   Indicate what your question is. Consider a question that could be answered best by utilizing facets, multiple geometries, multiple aesthetics, or some combination of those.
 -   Create a graph that assists in answering the question.
 -   Write a short interpretation of the graph in order to answer your question.
 
-7. Submit the following information about the project you would like to solve for your course project:
+8. Submit the following information about the project you would like to solve for your course project:
 
 *   The dataset(s) you will be utilizing to perform your analysis. This may be Slacked or emailed to me separately from this document. You may include a direct link to the dataset, a file, the API you intend to extract the data from, or the 
 *   The business question that you intend to answer through your analysis.
