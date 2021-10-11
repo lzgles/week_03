@@ -1,0 +1,1382 @@
+<!DOCTYPE html>
+<html lang="" xml:lang="">
+  <head>
+    <title>Foundations of R</title>
+    <meta charset="utf-8" />
+    <meta name="author" content="Ryan Harrington" />
+    <meta name="date" content="2021-10-11" />
+    <script src="index_files/header-attrs/header-attrs.js"></script>
+    <link rel="stylesheet" href="xaringan-themer.css" type="text/css" />
+    <link rel="stylesheet" href="custom.css" type="text/css" />
+  </head>
+  <body>
+    <textarea id="source">
+
+
+
+
+
+
+
+
+
+class: animated, fadeIn, content-slide
+layout: true
+
+---
+
+class: title-slide, middle
+layout: false
+
+# Foundations of R for Data Analysis
+
+### Week 03: Introduction to the tidyverse
+
+Ryan Harrington&lt;br&gt;
+October 11, 2021&lt;br&gt;
+University of Delaware&lt;br&gt;
+College of Professional &amp; Continuing Studies
+
+---
+
+class: content-slide
+
+# Questions We'll Answer Today
+
+### 🎥 What qualities are correlated with a high grossing film?&lt;br&gt;
+### ⬇️ How do we load our own datasets into R?&lt;br&gt;
+### ⭕ How can do we transform our data?&lt;br&gt;
+### 🗄 How can I organize my projects?&lt;br&gt;
+
+---
+
+class: content-slide
+
+# Review of Week 1 Assignment
+
+---
+
+class: content-slide
+
+# What qualities are correlated with a high grossing film?
+
+We'll be exploring a dataset of approximately 5,000 movies.
+
+You can find the dataset on [Kaggle](https://www.kaggle.com/tmdb/tmdb-movie-metadata?select=tmdb_5000_movies.csv).
+
+The data was originally sourced from [TMDB (The Movie Database)](https://www.themoviedb.org/).
+
+---
+
+class: content-slide
+
+# Getting started
+
+You'll find some files that you need for today's class in our `week_03` repository. Go to our [course organization](https://github.com/UD-PCS-Foundations-of-R-Fall-2021) and clone the [`week_03`](https://github.com/UD-PCS-Foundations-of-R-Fall-2021/week_03) file to your repository.
+
+---
+
+class: content-slide
+
+# Reading data into R
+
+Previously we utilized data that was pre-loaded into `R` in order to perform our analyses.
+
+In order to truly take advantage of `R`, we need to be able to work with our own data.
+
+Your data may come from many places:
+
+*   Databases
+*   Excel files
+*   Google Drive
+*   Text files
+
+---
+
+class: content-slide
+
+# Reading data into R
+
+Loading data follows the same general format.
+
+*   Identify the location the data will come from
+*   If necessary, secure the appropriate secrets for access to the data
+*   Identify the appropriate package to load your data format into `R`
+
+The simplest example of this is loading in data from a CSV file.
+
+---
+
+class: content-slide
+
+# Reading in data from a CSV file
+
+If you haven't worked with a CSV file before, they are an extremely common file type used for sharing data.
+
+The format is very simple. Each observation is stored between commas. If you were to open a CSV file, you would see it looking as follows:
+
+```
+col_char, col_int, col_num
+one, 2, 3.0
+four, 5, 6.7
+eight, 9, 10.1112
+```
+
+The commas are referred to as delimeters. There are other similar file types that utilize other delimiters. Semicolons and tabs are both common.
+
+---
+
+class: content-slide
+
+# Reading in data from a CSV file
+
+.pull-left[
+In the tidyverse the `readr` package is utilized for reading data into `R`. It's very simple to utilize. We'll specifically use the `read_csv` function.
+
+The function has a few parameters. You'll mostly not need to use them - particularly at first.]
+
+.pull-right[
+
+```r
+read_csv(
+  file,
+  col_names = TRUE,
+  col_types = NULL,
+  locale = default_locale(),
+  na = c("", "NA"),
+  quoted_na = TRUE,
+  quote = "\"",
+  comment = "",
+  trim_ws = TRUE,
+  skip = 0,
+  n_max = Inf,
+  guess_max = min(1000, n_max),
+  progress = show_progress(),
+  skip_empty_rows = TRUE
+)
+```
+]
+---
+
+class: content-slide
+
+# Reading in data from a CSV file
+
+.pull-left[
+In the tidyverse the `readr` package is utilized for reading data into `R`. It's very simple to utilize. We'll specifically use the `read_csv` function.
+
+The `file` parameter is most important right now.
+
+You'll notice that it's the first argument in the `read_csv` function. It's also the only argument that does not have a default value, so you must supply it. All of the other arguments, which have default values, are optional.
+]
+
+.pull-right[
+
+```r
+read_csv(
+* file,
+  col_names = TRUE,
+  col_types = NULL,
+  locale = default_locale(),
+  na = c("", "NA"),
+  quoted_na = TRUE,
+  quote = "\"",
+  comment = "",
+  trim_ws = TRUE,
+  skip = 0,
+  n_max = Inf,
+  guess_max = min(1000, n_max),
+  progress = show_progress(),
+  skip_empty_rows = TRUE
+)
+```
+]
+
+---
+
+class: content-slide
+
+# Reading in data from a CSV file
+
+As the `file` parameter is the only parameter that's required to work with `read_csv`, you'll need to identify the location of the file that you want to work with. Oftentimes, this will be on your local machine. It doesn't have to be, though. We'll work with files that are hosted remotely throughout this course. The process is basically the same, though.
+
+You'll notice that there are two folders in the repository: `Data` and `Data_Transformations`. In this particular case, we're going to read our data from `Data_Transformations`. 
+
+Simply supply the path that your data lives at into the function.
+
+
+```r
+movies &lt;- read_csv("Data_Transformations/movies_clean.csv")
+```
+
+Important to note, this is all based off of your **working directory**. Your working directory is just a file path on your computer that tells `R` where to read and write data from by default. You can check and set this with `getwd()` and `setwd()` respectively. There are better ways to do this, though. We'll cover this later.
+
+---
+
+class: content-slide
+
+# How does `read_csv` work?
+
+The `read_csv` function is actually just a special case of a more general function - `read_delim`.
+
+When `read_delim` is presented with a file, it will attempt to figure out what each column type is. It evaluates the first 1000 observations for each column to make a best guess at what its column type should be. It does that with two functions - `guess_parser` and `parse_guess`.
+
+`read_delim` does a reasonably good job at guessing column types, but it is not perfect. It's always worth checking your imported data to understand if it has been imported correctly. If it has not been imported correctly, you may want to take advantage of the `col_types` argument.
+
+---
+
+class: content-slide
+
+# Other ways to import data
+
+As an organization's data maturity improves, you will likely use different methods for importing your data. An immature data organization is likely to use spreadsheet tools like Excel or Google Sheets for all data needs. [(Source)](https://support.rstudio.com/hc/en-us/articles/201057987-Quick-list-of-useful-R-packages)
+
+* Excel - [readxl](https://readxl.tidyverse.org/) or [xlsx](https://cran.rstudio.com/web/packages/xlsx)
+* Google Sheets - [googlesheets4](https://googlesheets4.tidyverse.org/)
+
+As organizations mature, they are likely to utilize databases. `R` has many packages written to [handle nearly any database](https://db.rstudio.com/) you might encounter.
+
+* DBI - [DBI](https://db.rstudio.com/dbi/)
+* odbc - [odbc](https://db.rstudio.com/odbc/)
+* MySQL - [RMySQL](http://www.rdocumentation.org/packages/RMySQL/functions/RMySQL-package)
+
+An even more mature organization may use distributed data systems such as Spark. There are ways to work with these systems as well.
+
+* Spark - [sparklyr](https://spark.rstudio.com/)
+* BigQuery - [bigrquery](https://db.rstudio.com/databases/big-query/)
+
+---
+
+class: content-slide
+
+# How to manipulate your data
+
+We'll use another tidyverse package in order to begin manipulating data - `dplyr`.
+
+Last week we used the `str` function to get a better understanding of our data frame. The `dplyr` equivalent of this is `glimpse`. It gives the same information, but is formatted a bit more nicely. It's what I use day-to-day.
+
+
+```r
+glimpse(movies)
+```
+
+```
+## Rows: 4,775
+## Columns: 6
+## $ budget            &lt;dbl&gt; 2.37e+08, 3.00e+08, 2.45e+08, 2.50e+08, 2.60e+08, 2.…
+## $ homepage          &lt;chr&gt; "http://www.avatarmovie.com/", "http://disney.go.com…
+## $ id                &lt;dbl&gt; 19995, 285, 206647, 49026, 49529, 559, 38757, 99861,…
+## $ keywords          &lt;chr&gt; "[{\"id\": 1463, \"name\": \"culture clash\"}, {\"id…
+## $ original_language &lt;chr&gt; "en", "en", "en", "en", "en", "en", "en", "en", "en"…
+## $ original_title    &lt;chr&gt; "Avatar", "Pirates of the Caribbean: At World's End"…
+```
+
+---
+
+class: content-slide
+
+# Basic `dplyr` functions
+
+There are a few key `dplyr` functions worth understanding immediately. If you have a background with SQL, these will all feel pretty familiar.
+
+* `select`
+* `filter`
+* `arrange`
+* `mutate`
+* `summarize`
+* `group_by` / `ungroup`
+
+Let's explore each of these individually first.
+
+---
+
+class: content-slide
+
+# `select`
+
+The `select` function allows us to ...select... the fields that we want to work with for our analysis.
+
+According to its vignette, the only argument that is listed for the `select` function is `.data`. Remember that as we look at other `dplyr` functions.
+
+The other argument that it accepts is `...` (pronounced "dot-dot-dot"). This allows the `select` function to accept an arbitrary number of expressions. In this case, that is how we specify which fields we want to work with. We list them as unquoted expressions - similar to how we worked with fields when using `ggplot2`.
+
+Here's how that might look:
+
+
+```r
+select(movies, id, original_title, budget, popularity)
+```
+
+---
+
+class: content-slide
+
+# `select`
+
+You can imagine that this might get tedious to literally write every field you want to work with.
+
+Perhaps you want all of the columns except one.
+
+
+```r
+select(movies, -keywords)
+```
+Or perhaps you want to select all of the columns listed consecutively.
+
+
+```r
+select(movies, id, original_title, genre_Action:genre_TV)
+```
+---
+
+class: content-slide
+
+# `select`
+
+There are several other ways to `select` fields. There are a series of "tidy helpers" functions that can be used in conjunction with `select` that give you even more flexibility. From the `select` vignette:
+
+.pull-left[
+&gt; ...select specific columns:
+&gt; * `everything()`: Matches all variables.
+&gt; * `last_col()`: Select last variable, possibly with an offset.
+
+&gt; ...by matching patterns in their names:
+&gt; * `starts_with()`: Starts with a prefix.
+&gt; * `ends_with()`: Ends with a suffix.
+&gt; * `contains()`: Contains a literal string.
+&gt; * `matches()`: Matches a regular expression.
+&gt; * `num_range()`: Matches a numerical range like `x01`, `x02`, `x03`.
+]
+
+.pull-right[
+&gt; ...select variables from a character vector:
+&gt; * `all_of()`: Matches variable names in a character vector. All names must be present, otherwise an out-of-bounds error is thrown.
+&gt; * `any_of()`: Same as `all_of()`, except that no error is thrown for names that don't exist.
+
+&gt; ...selects variables with a function:
+&gt; * `where()`: Applies a function to all variables and selects those for which the function returns `TRUE.`
+]
+
+---
+
+class: content-slide
+
+# `select`
+
+You can put this into practice with our dataset. We'll keep using this new dataset for the rest of our analysis, so it would be valuable to assign it to any object.
+
+
+```r
+movies_sel &lt;- select(movies,
+                     id, contains("title"), original_language, budget, contains("vote"),
+                     starts_with("release"), where(is.double), starts_with("genre"))
+```
+
+We use several of the tidy helpers to support more easily selecting our fields:
+
+* `contains("title")` selects any field that includes the string "title", regardless of its placement in the field name (`original_title`, `title`)
+* `contains("vote")` selects any field that includes the string "vote", regardless of its placement in the field name (`vote_average`, `vote_count`)
+* `starts_with("release")` selects any field that begins with the string "release" (`release_date`, `release_year`)
+* `where(is.double)` selects any field that meets the criteria of being a double (`popularity`, `revenue`, `runtime`)
+* `starts_with("genre")` selects any field that begins with the string "genre" (`genre_Adventure`...`genre_TV`)
+
+
+---
+
+class: content-slide
+
+# `filter`
+
+Another common action you'll take to transform data frames is to filter, or subset, records.
+
+We pass a logical condition to the `filter` function. The only rows that will remain are those that match all of the conditions that we pass to it - all of those conditions that "produce a value of `TRUE`".
+
+Perhaps we want to find all of the movies in our dataset that are considered action movies. Here's how we could do that:
+
+
+```r
+filter(movies_sel, genre_Action)
+```
+Or perhaps you're interested in *good* action movies. Just pass in multiple conditions. This provides an implicit "AND" condition - both of those conditions must be `TRUE` in order for the row to be included in the final data frame.
+
+
+```r
+filter(movies_sel, 
+       genre_Action, 
+       vote_average &gt;= 7.5)
+```
+---
+
+class: content-slide
+
+# `filter`
+
+There may be several conditions that we think are acceptable. We can indicate an "OR" condition by using `|`.
+
+Perhaps for my analysis I'm only interested in "[romance languages](https://en.wikipedia.org/wiki/Romance_languages)" - i.e. English, French, Spanish, etc.
+
+
+```r
+filter(movies_sel,
+       original_language == "en" | original_language == "fr" | original_language == "es" | original_language == "it")
+```
+
+This could become very tedious very quickly. Instead, we should take advantage of an additional logical operator - `%in%`.
+
+
+```r
+filter(movies_sel, original_language %in% c("en", "fr", "es", "it"))
+```
+
+A nice best practice is to name the vector that you use with the `%in%` operator.
+
+
+```r
+romance_languages &lt;- c("en", "fr", "es", "it")
+
+filter(movies_sel, original_language %in% romance_languages)
+```
+
+---
+
+class: content-slide
+
+# `arrange`
+
+You might want to reorder your data based upon the values in a specific column.
+
+What is the least expensive movie in the dataset?
+
+
+```r
+arrange(movies_sel, budget)
+```
+You might prefer to order the data in descending order.
+
+What is the most expensive movie in the dataset?
+
+
+```r
+arrange(movies_sel, -budget)
+
+arrange(movies_sel, desc(budget))
+```
+
+You can do this with multiple conditions as well.
+
+
+```r
+arrange(movies_sel, release_year, desc(budget))
+```
+
+---
+
+class: content-slide
+
+# `mutate`
+
+So far we've only worked with existing variables, but what if we want to create *new* variables. The `mutate` function makes this possible. The syntax relies on creating name / value pairs:
+
+
+```r
+mutate(dataframe,
+       new_column_name = transformation)
+```
+
+How does the runtime for each movie compare to the average runtime for all movies?
+
+
+```r
+mutate(movies_sel,
+       runtime_diff = runtime - mean(runtime, na.rm = T))
+```
+Similarly to `filter` and `arrange`, you can pass multiple mutations to the `mutate` function at a time.
+
+
+```r
+mutate(movies_sel,
+       runtime_diff = runtime - mean(runtime, na.rm = T),
+       budget_diff = budget - median(budget, na.rm = T))
+```
+
+---
+
+class: content-slide
+
+# `summarize`
+
+For the `mutate` function, we return the same number of records that our dataset started with. The `summarize` function will reduce the number of records in our dataset.
+
+Without doing anything, you will end up with one row that summarizes all observations. There will be one column for each summary you generate. The syntax looks the same as the `mutate` function.
+
+
+```r
+summarize(movies_sel,
+          budget_median = median(budget, na.rm = T),
+          budget_mean = mean(budget, na.rm = T))
+```
+The `summarize` function gets more interesting when we pair it with grouping variables.
+
+---
+
+class: content-slide
+
+# `group_by` / `ungroup`
+
+The `group_by` function allows us to make our calculations within the groups of a variable.
+
+What is the mean and median budget for movies by year?
+
+Let's make a new data frame with `group_by`. We can observe how this changes the data frame.
+
+
+```r
+movies_group &lt;- group_by(movies_sel, release_year)
+```
+This now allows us to calculate the median and mean by release year.
+
+
+```r
+summarize(movies_group,
+          budget_median = median(budget, na.rm = T),
+          budget_mean = mean(budget, na.rm = T))
+```
+
+Typically, we would bookend the `group_by` function with the `ungroup` function. This removes the grouping variable from our newly created data frame. Leaving the grouping variable in can lead to unexpected side effects. It's a best practice to always remove it. Get into the habit of pairing your `group_by`s with `ungroup`s.
+
+---
+
+class: content-slide
+
+# How can I use multiple functions together?
+
+When we work with data we will often need to apply multiple data transformations to our data frames at a time. `dplyr` becomes much more powerful when we start using these functions with each other.
+
+What movie had the highest budget in 2001?
+
+
+```r
+arrange(filter(select(movies_sel, id, original_title, budget, release_year), release_year == 2001), desc(budget))
+```
+In this example, we build up to our final answer by layering the functions inside of each other. To read this, you need to peel back the layers. This code is very challenging to read.
+
+A better approach might be to make intermediate objects.
+
+
+```r
+movies_selected &lt;- select(movies_sel, id, original_title, budget, release_year)
+movies_filtered &lt;- filter(movies_filtered, release_year == 2001)
+movies_arranged &lt;- arrange(movies_filtered, desc(budget))
+```
+
+This is certainly easier to read, but comes at a cost. It is error prone to type. It also clutters your environment with many copies of your data frames, taking up your machine's memory. Of the two issues, error prone-ness is the *much* larger one.
+
+
+---
+
+class: content-slide
+
+# A better way: piping `%&gt;%`
+
+If it is confusing to nest our functions and cumbersome to assign each step to its own object, then what is a better solution?
+
+Enter piping. There are a few variations of the pipe, but the version that is most widely used is imported from the `magrittr` package into the tidyverse. It is represented in code as `%&gt;%`.
+
+Think of the pipe as meaning "and then".
+
+Let's re-write our code to answer the question of which movie had the highest budget in 2001 with the pipe.
+
+.pull-left[
+
+```r
+movies_sel %&gt;% 
+  select(id, original_title, budget, release_year) %&gt;% 
+  filter(release_year == 2001) %&gt;% 
+  arrange(desc(budget))
+```
+]
+.pull-right[
+
+```r
+# Take the `movies` dataset AND THEN
+# Select the given fields AND THEN
+# Filter records from 2001 AND THEN
+# Arrange in descending order by budget
+```
+]
+
+Chaining multiple commands suddenly becomes relatively simple AND easy to read.
+
+---
+
+class: content-slide
+
+# A better way: piping `%&gt;%`
+
+Pipes are not unique to `R`. You'll find them in various other languages. Pipes do add a ton of value to `R`, though.
+
+So, how does this work? Let's look at our previous code again.
+
+Notice that the first argument in each function is no longer written.
+
+
+```r
+movies_sel %&gt;% 
+  select(id, original_title, budget, release_year) %&gt;% 
+  filter(release_year == 2001) %&gt;% 
+  arrange(desc(budget))
+```
+
+You can think of the pipe as having a right hand side (RHS) and a left hand side (LHS).
+
+
+```r
+LHS %&gt;% RHS
+```
+
+The pipe simply replaces the first argument in the RHS with whatever is in the LHS.
+
+---
+
+class: content-slide
+
+# A better way: piping `%&gt;%`
+
+This LHS / RHS replacement procedure works particularly well with the tidyverse. Recall that each of the `dplyr` verbs utilized `.data` as the first argument. This means that the output from each step in our pipe chain becomes the input for the next step in the chain.
+
+The pipe works with functions beyond the tidyverse, though. As a simple example, you can use piping with some of the basic exploratory functions that we used last week, such as `summary` and `View`.
+
+
+```r
+movies_sel %&gt;% View()
+movies_sel %&gt;% summary()
+```
+
+---
+
+class: content-slide
+
+# A better way: piping `%&gt;%`
+
+Sometimes the function you want to use as part of a pipe does not work quite so conveniently. There are many functions where he default first argument is not the argument that would accept your output. The pipe has a concept of a `.` as a placeholder. It isn't exactly the same, but you encountered this idea when we looked at the `facet_wrap` and `facet_grid`
+
+For example, here's a pretty poorly conceived linear model (hence `lm`) that tries to predict budget based upon a movie's popularity, runtime, and vote average. The `lm` function accepts data as its second argument, so the pipe would fail without the `.` placeholder.
+
+
+```r
+movies_sel %&gt;% 
+  filter(genre_Action) %&gt;% 
+  lm(budget ~ popularity + runtime + vote_average, data = .) %&gt;% 
+  summary()
+```
+
+---
+
+class: content-slide
+
+# Putting the pipe into practice
+
+Let's try our hand at answering a few questions about our dataset using the `dplyr` verbs and pairing them with the piping technique.
+
+.pull-left[
+What movie had the highest vote average...
+
+* overall?
+* for movies released after 2010?
+* for movies with a vote count greater than the median after 2010?
+* for movies that made at least double of their budget?
+]
+
+---
+
+class: content-slide
+
+# Putting the pipe into practice
+
+Let's try our hand at answering a few questions about our dataset using the `dplyr` verbs and pairing them with the piping technique.
+
+.pull-left[
+What movie had the highest vote average...
+
+* **overall?**
+* for movies released after 2010?
+* for movies with a vote count greater than the median after 2010?
+* for movies that made at least double of their budget?
+]
+
+.pull-right[
+If we want to return the full dataset in order...
+
+```r
+movies_sel %&gt;% 
+  arrange(desc(vote_average))
+```
+
+If we want to only return the records with the highest vote average...
+
+```r
+movies_sel %&gt;% 
+  filter(vote_average == max(vote_average))
+```
+]
+
+---
+
+class: content-slide
+
+# Putting the pipe into practice
+
+Let's try our hand at answering a few questions about our dataset using the `dplyr` verbs and pairing them with the piping technique.
+
+.pull-left[
+What movie had the highest vote average...
+
+* overall?
+* **for movies released after 2010?**
+* for movies with a vote count greater than the median after 2010?
+* for movies that made at least double of their budget?
+]
+
+.pull-right[
+
+```r
+movies_sel %&gt;% 
+  filter(release_year &gt; 2010) %&gt;% 
+  arrange(desc(vote_average))
+```
+]
+
+---
+
+class: content-slide
+
+# Putting the pipe into practice
+
+Let's try our hand at answering a few questions about our dataset using the `dplyr` verbs and pairing them with the piping technique.
+
+.pull-left[
+What movie had the highest vote average...
+
+* overall?
+* for movies released after 2010?
+* **for movies with a vote count greater than the median after 2010?**
+* for movies that made at least double of their budget?
+]
+
+.pull-right[
+
+```r
+movies_sel %&gt;% 
+  filter(vote_count &gt; median(vote_count)) %&gt;% 
+  arrange(desc(vote_average))
+```
+]
+
+---
+
+class: content-slide
+
+# Putting the pipe into practice
+
+Let's try our hand at answering a few questions about our dataset using the `dplyr` verbs and pairing them with the piping technique.
+
+.pull-left[
+What movie had the highest vote average...
+
+* overall?
+* for movies released after 2010?
+* for movies with a vote count greater than the median after 2010?
+* **for movies that made at least double of their budget?**
+]
+
+.pull-right[
+
+```r
+movies_sel %&gt;% 
+  filter(budget &gt; 0) %&gt;% 
+  mutate(revenue_percent = (revenue - budget) / budget) %&gt;% 
+  filter(revenue_percent &gt; 2) %&gt;% 
+  arrange(desc(vote_average))
+```
+]
+
+---
+
+class: content-slide
+
+# Some more questions
+
+How many movies are represented from each language? What language has the second most movies represented?
+
+
+```r
+movies_sel %&gt;% 
+  group_by(original_language) %&gt;% 
+  summarize(count = n()) %&gt;% 
+  ungroup() %&gt;% 
+  arrange(desc(count))
+```
+Note the use of the `n` function. This function lets you calculate a count. Also notice the use of the `group_by` ... `ungroup` pattern. Remember - whenever you use `group_by` you should always bookend it with an `ungroup`.
+
+---
+
+class: content-slide
+
+# Some more questions
+
+How many movies were released each year?
+
+
+```r
+movies %&gt;% 
+  group_by(release_year) %&gt;% 
+  summarize(count = n()) %&gt;% 
+  ungroup()
+```
+
+Getting counts is a really common exercise. It can get tedious to constantly rewrite that snippet. There is a built in function in `dplyr` called `count` that is a shortcut to this. It is exactly equivalent to the above pattern.
+
+---
+
+class: content-slide
+
+# Some more questions
+
+How many movies were released each year?
+
+
+```r
+movies %&gt;% 
+* count(release_year)
+```
+By default, the column it produces will be called "n". You can rename this. There is also an additional parameterto sort the dataframe by the count column. This is very helpful during EDA.
+
+```r
+movies %&gt;% 
+* count(release_year, name = "count", sort = T)
+```
+
+---
+
+class: content-slide
+
+# Some more questions
+
+How much total budget was used across each original language?
+
+
+```r
+movies_sel %&gt;% 
+  group_by(original_language) %&gt;% 
+* summarize(budget_total = sum(budget)) %&gt;%
+  ungroup() %&gt;% 
+  arrange(desc(budget_total))
+```
+
+You can do more than count with the summarize function. You can apply a very wide variety of functions, such as a `sum`.
+
+---
+
+class: content-slide
+
+# Some more questions
+
+How did vote averages change for English language films over time?
+
+
+```r
+movies_sel %&gt;% 
+  filter(original_language == "en") %&gt;% 
+  group_by(release_year) %&gt;% 
+  summarize(vote_average = mean(vote_average)) %&gt;% 
+  ungroup() %&gt;% 
+* ggplot(aes(x = release_year,
+*            y = vote_average)) +
+* geom_line()
+```
+
+You can pipe your data transformation directly into a `ggplot`. Also very useful during EDA.
+
+---
+
+class: content-slide
+
+# Some more questions
+
+How many movie titles match their original title? How many did not?
+
+
+```r
+movies_sel %&gt;% 
+* mutate(title_match_flag = title == original_title) %&gt;%
+  count(title_match_flag)
+```
+
+Note what is happening in the `mutate`. We are mutating with a conditional statement. Anytime that the  `title` is equivalent to the `original_title` the newly created `title_match_flag` column will be labeled as `TRUE`. Otherwise it will be labeled as `FALSE`.
+
+---
+
+class: content-slide
+
+# Some more questions
+
+How many movie titles match their original title? How many did not?
+
+
+```r
+movies_sel %&gt;% 
+  mutate(title_match_flag = title == original_title) %&gt;%
+  count(title_match_flag) %&gt;% 
+  ggplot(aes(x = n, 
+             y = title_match_flag)) + 
+* geom_col()
+```
+
+This would be a great opportunity to build a bar graph to help understand the scale. In order to build the graph we utilize a new geometry `geom_col`. This is similar to `geom_bar`, but uses `stat = "identity"` as opposed to `stat = "count"`. This makes it very useful for times where we have pre-calculated values.
+
+---
+
+class: content-slide
+
+# Some more questions
+
+How many movie titles match their original title by year?
+
+
+```r
+movies_sel %&gt;% 
+  mutate(title_match_flag = title == original_title) %&gt;%
+* count(release_year, title_match_flag) %&gt;%
+  ggplot(aes(x = release_year,
+             y = n,
+             color = title_match_flag)) +
+  geom_line()
+```
+
+You are not limited to only counting or grouping by only one field. You can count or group by an arbitrary number of fields if you'd like to. In this case, those fields are `release_year` and `title_match_flag`. Note that any fields that you use as grouping variables will be represented in your final dataset.
+
+---
+
+class: content-slide
+
+# Some more questions
+
+What was the highest budget movie by year?
+
+
+```r
+movies_sel %&gt;% 
+  group_by(release_year) %&gt;% 
+* filter(budget == max(budget)) %&gt;%
+  ungroup() %&gt;% 
+  select(release_year, budget, title) %&gt;% 
+  arrange(release_year)
+```
+You are not limited to using `group_by` with the `summarize` function. It can be extremely powerful to pair it with other functions, such as `filter`.
+
+---
+
+class: content-slide
+
+# Some more questions
+
+Which title is closest to the median revenue by year?
+
+
+```r
+movies_sel %&gt;% 
+  group_by(release_year) %&gt;% 
+* mutate(revenue_median = median(revenue, na.rm = T),
+*        revenue_diff = revenue - revenue_median,
+*        revenue_diff_abs = abs(revenue_diff)) %&gt;%
+* filter(revenue_diff_abs == min(revenue_diff_abs)) %&gt;%
+  ungroup() %&gt;% 
+  select(release_year, title, revenue, revenue_median, revenue_diff) %&gt;% 
+  arrange(release_year)
+```
+You can include many functions between your `group_by` and `ungroup` functions. Consider when it is valuable to group your variables versus when it is valuable to not group your variables.
+
+---
+
+class: content-slide
+
+# Getting help
+
+There are lots of great places to ask for help online:
+
+* [Stack Overflow](https://stackoverflow.com/questions/tagged/r)
+
+* Twitter [#rstats](https://twitter.com/search?q=%23rstats&amp;src=typed_query)
+
+* [R4DS Online Learning Community](https://www.rfordatasci.com/)
+
+---
+
+class: content-slide
+
+# Creating a reproducible example - `reprex`
+
+When you go to any of those resources, you're relying on the generosity of strangers to help you. Providing a reproducible example is a good way to "help me help you".
+
+This boils down to providing enough information to give an appropriate answer and minimizing the amount of work that you're asking others to do for you.
+
+&gt; Parts of a reproducible example:
+
+&gt; 1. **background information** - Describe what you are trying to do. What have you already done?
+&gt; 2. **complete set up** - include any library() calls and data to reproduce your issue.
+&gt; **data for a reprex:** Here's a discussion on setting up data for a reprex
+&gt; 3. **make it run** - include the minimal code required to reproduce your error on the data provided.
+&gt; People should be able to copy and paste your code chunk and get the same error.
+&gt; How do I format my text so it has nice code chunks?
+&gt; 4. **minimal** - strip away everything that is not directly related to your problem. This usually involves creating a much smaller and simpler set of code and data compared to that which created your issue.
+
+[Source](https://community.rstudio.com/t/faq-whats-a-reproducible-example-reprex-and-how-do-i-create-one/5219)
+
+---
+
+class: content-slide
+
+# Creating a reproducible example - `reprex`
+
+Suppose we need help with this issue. It keeps generating an error and we can't figure out the issue.
+
+
+```r
+movies_sel_sample %&gt;% 
+  group_by(original_language) %&gt;% 
+  summarize(vote_average = mean(vote_average, na.rm = T)) %&gt;% 
+  ungroup() %&gt;% 
+  ggplot(aes(x = vote_average,
+             y = original_language)) %&gt;% 
+  geom_col()
+```
+
+To be clear, we do know the issue - you're trying to use `%&gt;%` when you should be using `+` as part of your `ggplot`.
+
+---
+
+class: content-slide
+
+# Creating a reproducible example - `reprex`
+
+First, create an example data frame. Only include the minimum fields needed to reproduce your issue. You don't need to include your full data frame.
+
+
+```r
+movies_sel %&gt;% 
+  select(id, title, original_language, vote_average) %&gt;% 
+  head() %&gt;% 
+  dput()
+```
+
+The `head` function selects the top few records of a data frame (6 by default, but you can change this to whatever you want). This is a really handy function for data exploration too. The `tail` function is similar, but it takes the *last* few records.
+
+The `dput` function allows you to copy your data in a way that is easy for someone else to load into their local instance of `R` You can copy this output and include it in your code snippet.
+
+---
+
+class: content-slide
+
+# Creating a reproducible example - `reprex`
+
+Now create a minimum example including the output of `dput`. Copy this and then run `reprex::reprex`. A nicely formatted version of your code will be output into your Viewer. This output is also automatically copied to your clipboard.
+
+
+```r
+library(tidyverse)
+
+movies_sel_sample &lt;- 
+  structure(list(id = c(19995, 285, 206647, 49026, 49529, 559), 
+                 title = c("Avatar", "Pirates of the Caribbean: At World's End", 
+                           "Spectre", "The Dark Knight Rises", "John Carter", "Spider-Man 3"
+                 ), original_language = c("en", "en", "en", "en", "en", "en"
+                 ), vote_average = c(7.2, 6.9, 6.3, 7.6, 6.1, 5.9)), row.names = c(NA, 
+                                                                                   -6L), class = c("tbl_df", "tbl", "data.frame"))
+
+
+movies_sel_sample %&gt;% 
+  group_by(original_language) %&gt;% 
+  summarize(vote_average = mean(vote_average, na.rm = T)) %&gt;% 
+  ungroup() %&gt;% 
+  ggplot(aes(x = vote_average,
+             y = original_language)) %&gt;% 
+  geom_col()
+```
+
+---
+
+class: content-slide
+
+# Structuring your repositories
+
+.pull-left[
+Remember, programming is a team sport. You want to utilize as many best practices as possible to reduce the overhead required for a team to work together. Part of that is *how* you write your code, but another part is how you set up your repository.
+
+It is important that every project lives in its own repository. It helps you keep your work organized and makes it easier for teammates (or future you!) to understand what is happening.
+
+Here's how I set up my repository when I begin an analysis. There are many other ways that you might set your repository up, particularly for other use cases. You and your team may adapt other best practices.
+]
+
+.pull-right[
+
+```r
+project
+│   README.md
+│   .gitignore
+│   .Rproj
+│
+└───Data
+│   │   file011.csv
+│   
+└───Data_Transformations
+│   │   file021.csv
+│
+└───Scripts
+│   │   file031.R
+│   
+└───Markdown
+│   │   file041.Rmd
+│   │   ...
+```
+]
+
+---
+
+class: content-slide
+
+# Structuring your repositories
+
+.pull-left[
+There are a few special files that I always include at the root of the directory I'm working in.
+
+**`README.md`** - this file serves as a high level description of what work is being executed in this repository. It is written in markdown and automatically rendered in a GitHub repository. Writing a great README is an art.
+
+**`.gitignore`** - we don't necessarily want to include all of our files on GitHub. For example, `R` generates history files as you're working in the background. No need to includes those on GitHub. I always start with what is included [here](https://www.toptal.com/developers/gitignore/api/r) and then add more to it as needed.
+
+**`.Rproj`** - a special file that provides some metadata to `R` about how you want to work. It also tells `R` what the root of your project directory is - your working directory.
+]
+
+.pull-right[
+
+```r
+project
+*│   README.md
+*│   .gitignore
+*│   .Rproj
+│
+└───Data
+│   │   file011.csv
+│   
+└───Data_Transformations
+│   │   file021.csv
+│
+└───Scripts
+│   │   file031.R
+│   
+└───Markdown
+│   │   file041.Rmd
+│   │   ...
+```
+]
+
+---
+
+class: content-slide
+
+# Structuring your repositories
+
+.pull-left[
+You'll then notice a series of folders that I add each time:
+
+**`Data`** - all raw data (CSVs, Excel files, etc.)
+
+**`Data_Transformations`** - all intermediate or final data
+
+**`Scripts`** - all `R` scripts, named following the tidyverse [style guide](https://style.tidyverse.org/files.html)
+
+**`Markdown`** - all `Rmd` files for initial EDA, intermediate analysis, or final reports
+]
+
+.pull-right[
+
+```r
+project
+│   README.md
+│   .gitignore
+│   .Rproj
+│
+*└───Data
+│   │   file011.csv
+│   
+*└───Data_Transformations
+│   │   file021.csv
+│
+*└───Scripts
+│   │   file031.R
+│   
+*└───Markdown
+│   │   file041.Rmd
+│   │   ...
+```
+]
+
+---
+
+class: content-slide
+
+# Here here!
+
+One last practice that ties in well to the idea of a project-based approach to creating repositories is the use of the **[`here`](https://here.r-lib.org/index.html)** package.
+
+We talked earlier about working directories and how they can get messy. This is particularly true for when code is built in one operating system and then run on another. For example, you wrote a script on your Mac. It is pushed to GitHub. Your colleague, who uses a PC, wants to clone the repo to their computer so that they can QA your work. Their file system is different than yours, so they struggle to run your code. Life is bad.
+
+Using the `here` package is a simple measure that you can take to eliminate these issues. Consider how you might change the original `read_csv` we used to import the `movies` data.
+
+
+```r
+library(tidyverse)
+library(here)
+
+movies &lt;- read_csv(here::here("Data_Transformations", "movies_clean.csv"))
+```
+
+That's it. That's all you have to do. Life is better.
+
+---
+
+class: title-slide, middle
+layout: false
+
+# Foundations of R for Data Analysis
+
+### Week 03: Introduction to the tidyverse
+
+Ryan Harrington&lt;br&gt;
+October 11, 2021&lt;br&gt;
+University of Delaware&lt;br&gt;
+College of Professional &amp; Continuing Studies
+    </textarea>
+<style data-target="print-only">@media screen {.remark-slide-container{display:block;}.remark-slide-scaler{box-shadow:none;}}</style>
+<script src="https://remarkjs.com/downloads/remark-latest.min.js"></script>
+<script>var slideshow = remark.create({
+"slideNumberFormat": "%current%/%total%",
+"highlightStyle": "github",
+"highlightLines": true,
+"ratio": "16:9",
+"countIncrementalSlides": true
+});
+if (window.HTMLWidgets) slideshow.on('afterShowSlide', function (slide) {
+  window.dispatchEvent(new Event('resize'));
+});
+(function(d) {
+  var s = d.createElement("style"), r = d.querySelector(".remark-slide-scaler");
+  if (!r) return;
+  s.type = "text/css"; s.innerHTML = "@page {size: " + r.style.width + " " + r.style.height +"; }";
+  d.head.appendChild(s);
+})(document);
+
+(function(d) {
+  var el = d.getElementsByClassName("remark-slides-area");
+  if (!el) return;
+  var slide, slides = slideshow.getSlides(), els = el[0].children;
+  for (var i = 1; i < slides.length; i++) {
+    slide = slides[i];
+    if (slide.properties.continued === "true" || slide.properties.count === "false") {
+      els[i - 1].className += ' has-continuation';
+    }
+  }
+  var s = d.createElement("style");
+  s.type = "text/css"; s.innerHTML = "@media print { .has-continuation { display: none; } }";
+  d.head.appendChild(s);
+})(document);
+// delete the temporary CSS (for displaying all slides initially) when the user
+// starts to view slides
+(function() {
+  var deleted = false;
+  slideshow.on('beforeShowSlide', function(slide) {
+    if (deleted) return;
+    var sheets = document.styleSheets, node;
+    for (var i = 0; i < sheets.length; i++) {
+      node = sheets[i].ownerNode;
+      if (node.dataset["target"] !== "print-only") continue;
+      node.parentNode.removeChild(node);
+    }
+    deleted = true;
+  });
+})();
+(function() {
+  "use strict"
+  // Replace <script> tags in slides area to make them executable
+  var scripts = document.querySelectorAll(
+    '.remark-slides-area .remark-slide-container script'
+  );
+  if (!scripts.length) return;
+  for (var i = 0; i < scripts.length; i++) {
+    var s = document.createElement('script');
+    var code = document.createTextNode(scripts[i].textContent);
+    s.appendChild(code);
+    var scriptAttrs = scripts[i].attributes;
+    for (var j = 0; j < scriptAttrs.length; j++) {
+      s.setAttribute(scriptAttrs[j].name, scriptAttrs[j].value);
+    }
+    scripts[i].parentElement.replaceChild(s, scripts[i]);
+  }
+})();
+(function() {
+  var links = document.getElementsByTagName('a');
+  for (var i = 0; i < links.length; i++) {
+    if (/^(https?:)?\/\//.test(links[i].getAttribute('href'))) {
+      links[i].target = '_blank';
+    }
+  }
+})();
+// adds .remark-code-has-line-highlighted class to <pre> parent elements
+// of code chunks containing highlighted lines with class .remark-code-line-highlighted
+(function(d) {
+  const hlines = d.querySelectorAll('.remark-code-line-highlighted');
+  const preParents = [];
+  const findPreParent = function(line, p = 0) {
+    if (p > 1) return null; // traverse up no further than grandparent
+    const el = line.parentElement;
+    return el.tagName === "PRE" ? el : findPreParent(el, ++p);
+  };
+
+  for (let line of hlines) {
+    let pre = findPreParent(line);
+    if (pre && !preParents.includes(pre)) preParents.push(pre);
+  }
+  preParents.forEach(p => p.classList.add("remark-code-has-line-highlighted"));
+})(document);</script>
+
+<script>
+slideshow._releaseMath = function(el) {
+  var i, text, code, codes = el.getElementsByTagName('code');
+  for (i = 0; i < codes.length;) {
+    code = codes[i];
+    if (code.parentNode.tagName !== 'PRE' && code.childElementCount === 0) {
+      text = code.textContent;
+      if (/^\\\((.|\s)+\\\)$/.test(text) || /^\\\[(.|\s)+\\\]$/.test(text) ||
+          /^\$\$(.|\s)+\$\$$/.test(text) ||
+          /^\\begin\{([^}]+)\}(.|\s)+\\end\{[^}]+\}$/.test(text)) {
+        code.outerHTML = code.innerHTML;  // remove <code></code>
+        continue;
+      }
+    }
+    i++;
+  }
+};
+slideshow._releaseMath(document);
+</script>
+<!-- dynamically load mathjax for compatibility with self-contained -->
+<script>
+(function () {
+  var script = document.createElement('script');
+  script.type = 'text/javascript';
+  script.src  = 'https://mathjax.rstudio.com/latest/MathJax.js?config=TeX-MML-AM_CHTML';
+  if (location.protocol !== 'file:' && /^https?:/.test(script.src))
+    script.src  = script.src.replace(/^https?:/, '');
+  document.getElementsByTagName('head')[0].appendChild(script);
+})();
+</script>
+  </body>
+</html>
