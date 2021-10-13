@@ -1,0 +1,292 @@
+---
+title: "Week 03 Class Examples"
+author: "Ryan Harrington"
+date: "10/11/2021"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+```{r}
+library(tidyverse)
+```
+
+```{r}
+movies <- read_csv("Data_Transformations/movies_clean.csv")
+```
+
+```{r}
+glimpse(movies)
+```
+
+```{r}
+select(movies, id, title, original_title)
+```
+
+```{r}
+select(movies, -keywords)
+```
+
+```{r}
+select(movies, id, original_title, genre_Action:genre_TV)
+```
+
+```{r}
+movies_sel <-
+  select(movies,
+         id, contains("title"), original_language, budget, contains("vote"),
+         starts_with("release"), where(is.double), starts_with("genre"))
+```
+
+```{r}
+filter(movies_sel,
+       genre_Action,
+       vote_average >= 7.5)
+```
+
+```{r}
+filter(movies_sel,
+       original_language == "en" | original_language == "fr" | original_language == "es" | original_language == "it")
+```
+
+```{r}
+filter(movies_sel,
+       original_language %in% c("en", "fr", "es", "it"))
+```
+
+```{r}
+romance_languages <- c("en", "fr", "es", "it")
+
+filter(movies_sel,
+       original_language %in% romance_languages)
+```
+
+```{r}
+arrange(movies_sel, budget)
+```
+
+```{r}
+arrange(movies_sel, -budget)
+arrange(movies_sel, desc(budget))
+```
+
+```{r}
+arrange(movies_sel, release_year, desc(budget))
+```
+
+```{r}
+mutate(movies_sel,
+       new_column_name = transformation)
+```
+
+
+```{r}
+mutate(movies_sel,
+       profit = revenue - budget,
+       runtime_diff = runtime - mean(runtime, na.rm = T))
+```
+
+```{r}
+summarize(movies_sel,
+          budget_median = median(budget, na.rm = T),
+          budget_mean = mean(budget, na.rm = TRUE))
+```
+
+```{r}
+movies_group <- group_by(movies_sel, release_year)
+
+summarize(movies_group,
+          budget_median = median(budget, na.rm = T),
+          budget_mean = mean(budget, na.rm = TRUE),
+          movies_count = n())
+```
+
+What movie had the highest budget in 2001?
+
+```{r}
+arrange(filter(select(movies, id, original_title, budget, release_year), release_year == 2001), desc(budget))
+```
+
+```{r}
+movies_selected <- select(movies_sel, id, original_title, budget, release_year)
+movies_filtered <- filter(movies_selected, release_year == 2001)
+movies_arranged <- arrange(movies_filtered, desc(budget))
+```
+
+```{r}
+movies_sel %>% 
+  select(id, original_title, budget, release_year) %>% 
+  filter(release_year == 2001) %>% 
+  arrange(desc(budget))
+```
+
+```{r}
+LHS %>% RHS
+```
+
+```{r}
+movies_sel %>% summary()
+summary(movies_sel)
+```
+
+What movie had the highest vote average...
+
+* overall?
+* for movies released after 2010?
+* for movies with a vote count greater than the median after 2010?
+* for movies that made at least double of their budget?
+
+```{r}
+movies_sel %>% 
+  arrange(desc(vote_average))
+```
+
+```{r}
+movies_sel %>% 
+  filter(vote_average == max(vote_average))
+```
+
+```{r}
+movies_sel %>% 
+  filter(release_year > 2010,
+         vote_average == max(vote_average))
+```
+...for movies with a vote count greater than the median after 2010?
+
+```{r}
+movies_sel %>% 
+  filter(vote_count > median(vote_count)) %>% 
+  arrange(desc(vote_average))
+```
+..for movies that made at least double of their budget?
+
+```{r}
+movies_sel %>% 
+  # Remove anything with a budget of 0 because it skews data
+  filter(budget > 0) %>% 
+  
+  # Calculated percentage change of budget
+  mutate(revenue_percent = (revenue - budget) / budget) %>% 
+  filter(revenue_percent > 2) %>% 
+  arrange(desc(vote_average))
+```
+
+How many movies are represented from each language? What language has the second most movies represented?
+
+```{r}
+movies_sel %>% 
+  group_by(original_language) %>% 
+  summarize(count = n()) %>% 
+  ungroup() %>% 
+  arrange(desc(count))
+```
+How many movies were released each year?
+
+```{r}
+movies_sel %>% 
+  group_by(release_year) %>% 
+  summarize(count = n()) %>% 
+  ungroup() %>% 
+  arrange(desc(count))
+```
+
+```{r}
+movies_sel %>% 
+  count(release_year, name = "count", sort = T)
+```
+
+How much total budget was used across each original language?
+
+```{r}
+movies_sel %>% 
+  group_by(original_language) %>% 
+  summarize(budget_total = sum(budget)) %>% 
+  ungroup() %>% 
+  arrange(desc(budget_total))
+```
+
+How did vote averages change for English language films over time?
+
+```{r}
+movies_sel %>% 
+  filter(original_language == "en") %>% 
+  group_by(release_year) %>% 
+  summarize(vote_average = mean(vote_average, na.rm = T)) %>% 
+  ungroup() %>% 
+  ggplot(aes(x = release_year,
+             y = vote_average)) + 
+  geom_line()
+```
+
+How many movie titles match their original title? How many did not?
+
+```{r}
+movies_sel %>% 
+  mutate(title_match_flag = title == original_title) %>% 
+  count(title_match_flag) %>% 
+  ggplot(aes(x = n,
+             y = title_match_flag)) +
+  geom_col()
+```
+How many movie titles match their original title by year?
+
+```{r}
+movies_sel %>% 
+  mutate(title_match_flag = title == original_title) %>% 
+  count(title_match_flag, release_year) %>% 
+  ggplot(aes(x = release_year,
+             y = n,
+             color = title_match_flag)) +
+  geom_line()
+```
+
+What was the highest budget movie by year?
+
+```{r}
+movies_sel %>% 
+  group_by(release_year) %>% 
+  filter(budget == max(budget)) %>% 
+  ungroup() %>% 
+  select(release_year, budget, title) %>% 
+  arrange(release_year) %>% 
+  count(release_year, sort = T)
+```
+
+Which title is closest to the median revenue by year?
+
+```{r}
+median_revenues_close <- 
+  movies_sel %>% 
+  group_by(release_year) %>% 
+  mutate(revenue_median = median(revenue, na.rm = T),
+         revenue_diff = revenue - revenue_median,
+         revenue_diff_abs = abs(revenue_diff)) %>% 
+  filter(revenue_diff_abs == min(revenue_diff_abs)) %>% 
+  ungroup() %>% 
+  select(release_year, title, revenue, revenue_median, revenue_diff, revenue_diff_abs) %>% 
+  arrange(release_year)
+```
+
+```{r}
+movies_sel %>% 
+  select(id, title, original_language, vote_average) %>% 
+  head() %>% 
+  dput()
+```
+
+```{r}
+structure(list(id = c(19995, 285, 206647, 49026, 49529, 559), 
+    title = c("Avatar", "Pirates of the Caribbean: At World's End", 
+    "Spectre", "The Dark Knight Rises", "John Carter", "Spider-Man 3"
+    ), original_language = c("en", "en", "en", "en", "en", "en"
+    ), vote_average = c(7.2, 6.9, 6.3, 7.6, 6.1, 5.9)), row.names = c(NA, 
+-6L), class = c("tbl_df", "tbl", "data.frame"))
+```
+
+```{r}
+# install.package("here")
+library(here)
+```
+
