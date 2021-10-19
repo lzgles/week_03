@@ -19,9 +19,15 @@ library(here)
 
 vehicles <- read_csv(here::here("Data", "vehicles.csv"),
                      col_types = cols(.default = "c"))
+
+str(vehicles)
+
+
 ```
 
 Describe what is happening in the `col_types` parameter. Why do you think this is necessary?
+
+Col_types is coercing all columns into the character data type. This may be necessary if your data set includes data that are numbers but are also classes - for example in this case, the number of cylinders. We do not want this column converted to numerical, instead, we want to keep 2-cylinder cars, 4-cylinder cars, 8-cylinder cars, etc. as separate classes not as continuous values.  
 
 2. Create a reduced version of the dataset that includes the following fields:
 
@@ -43,6 +49,15 @@ Assign this to a new dataframe called `vehicles_sub`.
 
 ```{r}
 
+vehicles_sub <- select(vehicles, make, model, year, cylinders, drive, trany, evMotor, fuelCost08, highway08, city08, feScore) %>%
+      mutate(year = as.double(year), 
+             fuelCost08 = as.double(fuelCost08), 
+             highway08 = as.double(highway08), 
+             city08 = as.double(city08), 
+             feScore = as.double(feScore))
+
+
+
 ```
 
 3. Conduct an exploratory analysis of each field in the dataset. This should include:
@@ -56,15 +71,76 @@ Indicate anything interesting that you notice.
 *Hint: When finding counts of fields, sometimes it is helpful to sort the field from highest to lowest values.*
 
 ```{r}
+str(vehicles_sub)
+# or
+glimpse(vehicles_sub)
+
+View(vehicles_sub) #is also possibly useful if the dataset is not too large
 
 ```
 
 
 ```{r}
+vehicles_sub %>%
+count(make)
+
+vehicles_sub %>%
+count(model)
+
+vehicles_sub %>%
+count(cylinders)
+
+vehicles_sub %>%
+count(cylinders, make)
+#Interesting: a lot of the makes with higher cylinder #s are high-performance, expensive brands (Lamborghini, Porsche, Bently, etc.). I was curious which Dodge was at the top of that list
+vehicles_sub %>%
+count(cylinders, make, model)
+#Interesting: it turned out to be a Viper
+
+vehicles_sub %>%
+count(cylinders, make, model)
+
+
+vehicles_sub %>%
+count(drive)
+
+vehicles_sub %>%
+count(trany)
+
+vehicles_sub %>%
+count(evMotor)
+
+vehicles_sub %>%
+count(year)
+
+vehicles_sub %>%
+  count(evMotor, year) %>%
+  arrange(-year)
+# Interesting: the first evMotors were introduced in 1998
+
 
 ```
 
 ```{r}
+
+
+ggplot(data = vehicles_sub) +
+  geom_histogram(aes(x = fuelCost08))
+
+
+ggplot(data = vehicles_sub) +
+  geom_histogram(aes(x = highway08))
+
+
+ggplot(data = vehicles_sub) +
+  geom_histogram(aes(x = city08))
+
+
+ggplot(data = vehicles_sub) +
+  geom_histogram(aes(x = feScore))
+
+
+
 
 ```
 
@@ -74,6 +150,8 @@ Indicate anything interesting that you notice.
 
 ```{r}
 
+ev_flag <- vehicles_sub %>%
+  mutate(evMotor_flag = !is.na(evMotor)) 
 ```
 
 
@@ -81,11 +159,35 @@ Indicate anything interesting that you notice.
 
 ```{r}
 
+
+vehicles_sub %>%
+  group_by(year) %>%
+  summarize(median_city08 = median(city08, na.rm = T)) %>%
+  ungroup() %>%
+  ggplot(aes(x = year,
+             y = median_city08)) + 
+  geom_line()
+  
+
 ```
 
 6. Consider the top 5 car makes whose fuel economies have been evaluated most frequently. Create a graph that demonstrates how the city fuel mileage has changed over time for these makes.
 
 ```{r}
+vehicles_sub %>%
+  count(make) %>%
+  arrange(-n)
+
+
+vehicles_sub %>%
+  filter(make == "Chevrolet" | make == "Ford" | make == "Dodge" | make == "GMC" | make == "Toyota") %>% 
+  group_by(make, year) %>%
+  summarize(median_city08 = median(city08, na.rm = T)) %>%
+  ungroup() %>%
+  ggplot(aes(x = year,
+             y = median_city08)) +
+  geom_line() + 
+  facet_grid(~make)
 
 ```
 
@@ -95,8 +197,33 @@ Indicate anything interesting that you notice.
 -   Create a graph that assists in answering the question.
 -   Write a short interpretation of the graph in order to answer your question.
 
+My question: is the fuel cost of Lamborghinis with different transmissions increasing or decreasing over time?
+My first observation is that not all of the transmission styles have enough data to show a trend. For those that do, the Automatic AM-S7, the Automatic S6, and the Manual 6 speed show lower fuel costs in their later model years. The Manual 5 speed is near the middle of its range in later model years. 
+
+```{r}
+
+vehicles_sub %>%
+  filter(make == "Lamborghini") %>%
+    group_by(year, trany) %>%
+  summarize(med_fuel_cost = median(fuelCost08)) %>%
+  ungroup() %>%
+  ggplot(aes(x = year,
+             y = med_fuel_cost)) +
+  geom_line() + 
+  facet_wrap(~trany)
+
+```
+
+
+
 8. Submit the following information about the project you would like to solve for your course project:
 
 *   The dataset(s) you will be utilizing to perform your analysis. This may be Slacked or emailed to me separately from this document. You may include a direct link to the dataset, a file, the API you intend to extract the data from, or the 
 *   The business question that you intend to answer through your analysis.
 *   A high level description of how you intend to answer the proposed business question.
+
+
+I am still discussing with my boss specifically which dataset he would like me to use for my course project. It will be a highthrouput sequencing dataset which will include a table of counts of different microbial species (identified by OTU-ID in the spreadsheet) in different samples along with metadata about the samples. This may include water chemistry, soil chemistry or physical characteristics, habitat type, season, farming treatment, or other variables depending on his final decision about which dataset to use. I will send an example dataset. This may be the final one he chooses or he may want me to change to another. The question is how does the microbial community differ among the samples. For the example, the samples are from a farming study and we are comparing the microbial community in different treatments (organic versus conventional farming) and different crops. The question about how the microbial community differs will be the same regardless of the dataset, only the samples being compared will change if I need to use a different data set (we might compare summer vs winter instead of corn vs beans). I intend to use both visual comparisons and statistical tests to compare samples. We typically use specific packages (e.g. "vegan", "phyloseq") for our analysis, but I would like to explore some of the more "normal" graphs and statistics.
+
+
+
